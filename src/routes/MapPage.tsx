@@ -24,24 +24,19 @@ export default function MapPage() {
     return m;
   }, [finished]);
 
-  const stripedCca2 = useMemo(() => {
-    const set = new Set<string>();
-    for (const b of library.books) {
-      if (!b.countryCode) continue;
-      if (b.status !== 'owned' && b.status !== 'reading') continue;
-      if ((countsByCca2[b.countryCode] ?? 0) > 0) continue;
-      set.add(b.countryCode);
-    }
-    return set;
-  }, [library.books, countsByCca2]);
-
   const denominatorHits = Object.keys(countsByCca2).filter(isDenominatorCountry).length;
   const total = UN_DENOMINATOR.size;
   const pct = total ? ((denominatorHits / total) * 100).toFixed(1) : '0';
 
   const mostRead = useMemo(() => {
-    const entries = Object.entries(countsByCca2).sort(([, a], [, b]) => b - a);
-    return entries[0];
+    const entries = Object.entries(countsByCca2);
+    if (entries.length === 0) return null;
+    const max = entries.reduce((m, [, c]) => (c > m ? c : m), 0);
+    const cca2s = entries
+      .filter(([, c]) => c === max)
+      .map(([k]) => k)
+      .sort((a, b) => countryName(a).localeCompare(countryName(b)));
+    return { count: max, cca2s };
   }, [countsByCca2]);
 
   const booksForSelected = useMemo(() => {
@@ -89,7 +84,7 @@ export default function MapPage() {
         total: totalsByCca2[cca2] ?? 0,
         name: countryName(cca2),
       }))
-      .sort((a, b) => b.count - a.count || b.total - a.total || a.name.localeCompare(b.name));
+      .sort((a, b) => a.name.localeCompare(b.name));
   }, [countsByCca2, totalsByCca2]);
 
   return (
@@ -99,12 +94,25 @@ export default function MapPage() {
           <h1 className="text-2xl font-semibold">
             {denominatorHits} / {total} countries · {pct}%
           </h1>
-          <div className="text-sm text-gray-600 flex flex-wrap gap-4 mt-1">
-            <span>{finished.length} books finished</span>
-            {mostRead && (
-              <span>
-                Most read: {countryFlag(mostRead[0])} {countryName(mostRead[0])} ({mostRead[1]})
-              </span>
+          <div className="text-sm text-gray-600 mt-1 space-y-1">
+            <div>{finished.length} books finished</div>
+            {mostRead && mostRead.cca2s.length === 1 && (
+              <div>
+                Most read: {countryFlag(mostRead.cca2s[0])} {countryName(mostRead.cca2s[0])} (
+                {mostRead.count})
+              </div>
+            )}
+            {mostRead && mostRead.cca2s.length > 1 && (
+              <div>
+                <div>Most read ({mostRead.count} each):</div>
+                <ul className="ml-4 mt-0.5">
+                  {mostRead.cca2s.map((cca2) => (
+                    <li key={cca2}>
+                      {countryFlag(cca2)} {countryName(cca2)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
           </div>
         </div>
@@ -120,7 +128,6 @@ export default function MapPage() {
         <div>
           <WorldMap
             countsByCca2={countsByCca2}
-            stripedCca2={stripedCca2}
             selectedCca2={selected}
             onSelect={setSelected}
           />
@@ -145,15 +152,15 @@ export default function MapPage() {
             Add a book to see its country here.
           </div>
         ) : (
-          <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-1 text-sm">
+          <ul className="text-sm divide-y border rounded bg-white">
             {sortedCountries.map((c) => (
               <li key={c.cca2}>
                 <button
                   type="button"
                   onClick={() => setSelected(c.cca2)}
                   className={[
-                    'flex items-center gap-2 w-full py-1 hover:text-emerald-700',
-                    c.cca2 === selected ? 'text-emerald-700 font-medium' : '',
+                    'flex items-center gap-2 w-full py-2 px-3 hover:bg-gray-50',
+                    c.cca2 === selected ? 'text-emerald-700 font-medium bg-emerald-50' : '',
                   ].join(' ')}
                 >
                   <span className="text-lg leading-none">{countryFlag(c.cca2)}</span>
