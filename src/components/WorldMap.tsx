@@ -12,7 +12,6 @@ import {
   CONTINENT_PALETTE,
   Continent,
   NEUTRAL_FILL,
-  bucket,
   continentFor,
 } from '../lib/continents';
 
@@ -29,18 +28,40 @@ interface CountryFeatureProps {
 const WIDTH = 960;
 const HEIGHT = 500;
 const NEUTRAL_HOVER = '#d1d5db';
+const SATURATION_CAP = 10;
+
+function hexToRgb(hex: string): [number, number, number] {
+  const n = parseInt(hex.slice(1), 16);
+  return [(n >> 16) & 0xff, (n >> 8) & 0xff, n & 0xff];
+}
+
+function rgbToHex(r: number, g: number, b: number): string {
+  const to2 = (v: number) => Math.round(v).toString(16).padStart(2, '0');
+  return `#${to2(r)}${to2(g)}${to2(b)}`;
+}
+
+function lerpColor(a: string, b: string, t: number): string {
+  const [ar, ag, ab] = hexToRgb(a);
+  const [br, bg, bb] = hexToRgb(b);
+  return rgbToHex(ar + (br - ar) * t, ag + (bg - ag) * t, ab + (bb - ab) * t);
+}
+
+function scaleT(count: number): number {
+  if (count <= 1) return 0;
+  if (count >= SATURATION_CAP) return 1;
+  return (count - 1) / (SATURATION_CAP - 1);
+}
 
 function fillFor(continent: Continent | null, count: number): string {
-  if (count > 0 && continent) return CONTINENT_PALETTE[continent][bucket(count)];
-  return NEUTRAL_FILL;
+  if (count === 0 || !continent) return NEUTRAL_FILL;
+  const palette = CONTINENT_PALETTE[continent];
+  return lerpColor(palette[1], palette[3], scaleT(count));
 }
 
 function hoverFillFor(continent: Continent | null, count: number): string {
-  if (count > 0 && continent) {
-    const idx = Math.min(3, bucket(count) + 1);
-    return CONTINENT_PALETTE[continent][idx];
-  }
-  return NEUTRAL_HOVER;
+  if (count === 0 || !continent) return NEUTRAL_HOVER;
+  const palette = CONTINENT_PALETTE[continent];
+  return lerpColor(palette[1], palette[3], Math.min(1, scaleT(count) + 0.15));
 }
 
 export default function WorldMap({ countsByCca2, selectedCca2, onSelect }: Props) {
@@ -154,23 +175,23 @@ function Legend() {
   return (
     <div className="mt-3 text-xs text-gray-600 space-y-2">
       <div className="flex flex-wrap gap-3">
-        {CONTINENT_ORDER.map((c) => (
-          <span key={c} className="flex items-center gap-1">
-            <span className="flex rounded-sm overflow-hidden">
-              {[1, 2, 3].map((b) => (
-                <span
-                  key={b}
-                  className="w-2.5 h-3"
-                  style={{ background: CONTINENT_PALETTE[c][b] }}
-                />
-              ))}
+        {CONTINENT_ORDER.map((c) => {
+          const palette = CONTINENT_PALETTE[c];
+          return (
+            <span key={c} className="flex items-center gap-1">
+              <span
+                className="w-10 h-3 rounded-sm"
+                style={{
+                  background: `linear-gradient(to right, ${palette[1]}, ${palette[3]})`,
+                }}
+              />
+              <span>{CONTINENT_LABEL[c]}</span>
             </span>
-            <span>{CONTINENT_LABEL[c]}</span>
-          </span>
-        ))}
+          );
+        })}
       </div>
       <div className="text-gray-500">
-        Shades = finished books (1, 2–4, 5+). Grey = nothing finished yet.
+        Saturation = finished books (1 → 10+). Grey = none finished.
       </div>
     </div>
   );
