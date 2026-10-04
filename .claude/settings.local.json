@@ -18,7 +18,8 @@
       "Bash(curl -sS -L -o src/__tests__/fixtures/wd-Q656.json \"https://www.wikidata.org/wiki/Special:EntityData/Q656.json\")",
       "Bash(curl -sS -L -o src/__tests__/fixtures/wd-Q159.json \"https://www.wikidata.org/wiki/Special:EntityData/Q159.json\")",
       "Bash(curl -sS -L -o src/__tests__/fixtures/wd-search-nabokov.json \"https://www.wikidata.org/w/api.php?action=wbsearchentities&search=Vladimir+Nabokov&language=en&type=item&limit=5&format=json&origin=*\")",
-      "Bash(git commit -m 'feat\\(lib\\): Wikidata author -> country resolution *)"
+      "Bash(git commit -m 'feat\\(lib\\): Wikidata author -> country resolution *)",
+      "Bash(git commit -m 'feat\\(lib\\): countries wrappers + 195-country UN denominator *)"
     ]
   }
 }
