@@ -3,7 +3,8 @@
     "allow": [
       "Bash(git add *)",
       "Bash(git commit -m 'chore: scaffold Vite + React + TS + Tailwind + router shell *)",
-      "Bash(git commit -m 'feat\\(state\\): schema, storage with migrate, BooksProvider *)"
+      "Bash(git commit -m 'feat\\(state\\): schema, storage with migrate, BooksProvider *)",
+      "Bash(git commit -m 'feat\\(lib\\): isbn detection, validation, 10<->13 conversion *)"
     ]
   }
 }
