@@ -106,7 +106,6 @@ export default function CountrySelect({ value, onChange, placeholder, autoFocus 
               >
                 <span className="text-lg leading-none">{o.flag}</span>
                 <span className="flex-1">{o.name}</span>
-                <span className="text-xs text-gray-400">{o.cca2}</span>
               </li>
             ))}
           </ul>
