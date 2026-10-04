@@ -6,6 +6,15 @@ import type { Feature, FeatureCollection, Geometry } from 'geojson';
 // {objects: {countries: GeometryCollection}, ...}.
 import rawTopology from 'world-atlas/countries-110m.json';
 import { getCountryByCcn3 } from '../lib/countries';
+import {
+  CONTINENT_LABEL,
+  CONTINENT_ORDER,
+  CONTINENT_PALETTE,
+  Continent,
+  NEUTRAL_FILL,
+  bucket,
+  continentFor,
+} from '../lib/continents';
 
 interface Props {
   countsByCca2: Record<string, number>;
@@ -20,15 +29,18 @@ interface CountryFeatureProps {
 const WIDTH = 960;
 const HEIGHT = 500;
 
-function bucket(count: number): 0 | 1 | 2 | 3 {
-  if (count === 0) return 0;
-  if (count === 1) return 1;
-  if (count <= 4) return 2;
-  return 3;
+function fillFor(continent: Continent | null, count: number): string {
+  if (!continent) return NEUTRAL_FILL;
+  return CONTINENT_PALETTE[continent][bucket(count)];
 }
 
-const FILLS = ['#e5e7eb', '#a7f3d0', '#34d399', '#059669'] as const;
-const HOVER_FILLS = ['#d1d5db', '#6ee7b7', '#10b981', '#047857'] as const;
+function hoverFillFor(continent: Continent | null, count: number): string {
+  if (!continent) return '#d1d5db';
+  const palette = CONTINENT_PALETTE[continent];
+  // Darken by moving one bucket up, clamped.
+  const idx = Math.min(3, bucket(count) + 1);
+  return palette[idx];
+}
 
 export default function WorldMap({ countsByCca2, selectedCca2, onSelect }: Props) {
   const [hover, setHover] = useState<{ cca2: string; x: number; y: number } | null>(null);
@@ -57,8 +69,16 @@ export default function WorldMap({ countsByCca2, selectedCca2, onSelect }: Props
           const country = getCountryByCcn3(ccn3);
           const cca2 = country?.cca2;
           const count = cca2 ? (countsByCca2[cca2] ?? 0) : 0;
+          const continent = cca2 ? continentFor(cca2) : null;
           const d = pathFn(f as Feature<Geometry, CountryFeatureProps>) ?? '';
-          return { f, cca2, count, d, name: country?.name.common ?? f.properties.name };
+          return {
+            f,
+            cca2,
+            count,
+            continent,
+            d,
+            name: country?.name.common ?? f.properties.name,
+          };
         })
         .filter((item) => item.d),
     [features, pathFn, countsByCca2],
@@ -75,11 +95,10 @@ export default function WorldMap({ countsByCca2, selectedCca2, onSelect }: Props
         aria-label="World map"
       >
         <g>
-          {items.map(({ f, cca2, count, d }) => {
-            const b = bucket(count);
+          {items.map(({ f, cca2, count, continent, d }) => {
             const isSelected = cca2 && cca2 === selectedCca2;
             const isHovered = hover?.cca2 === cca2;
-            const fill = isHovered ? HOVER_FILLS[b] : FILLS[b];
+            const fill = isHovered ? hoverFillFor(continent, count) : fillFor(continent, count);
             return (
               <path
                 key={String(f.id)}
@@ -87,24 +106,20 @@ export default function WorldMap({ countsByCca2, selectedCca2, onSelect }: Props
                 fill={fill}
                 stroke={isSelected ? '#111827' : '#ffffff'}
                 strokeWidth={isSelected ? 2 : 0.5}
-                className={count > 0 ? 'cursor-pointer' : 'cursor-default'}
+                className="cursor-pointer"
                 onMouseEnter={(e) => {
                   if (!cca2) return;
-                  const rect = (e.currentTarget.ownerSVGElement as SVGSVGElement).getBoundingClientRect();
-                  setHover({
-                    cca2,
-                    x: e.clientX - rect.left,
-                    y: e.clientY - rect.top,
-                  });
+                  const rect = (
+                    e.currentTarget.ownerSVGElement as SVGSVGElement
+                  ).getBoundingClientRect();
+                  setHover({ cca2, x: e.clientX - rect.left, y: e.clientY - rect.top });
                 }}
                 onMouseMove={(e) => {
                   if (!cca2) return;
-                  const rect = (e.currentTarget.ownerSVGElement as SVGSVGElement).getBoundingClientRect();
-                  setHover({
-                    cca2,
-                    x: e.clientX - rect.left,
-                    y: e.clientY - rect.top,
-                  });
+                  const rect = (
+                    e.currentTarget.ownerSVGElement as SVGSVGElement
+                  ).getBoundingClientRect();
+                  setHover({ cca2, x: e.clientX - rect.left, y: e.clientY - rect.top });
                 }}
                 onMouseLeave={() => setHover(null)}
                 onClick={() => {
@@ -122,7 +137,6 @@ export default function WorldMap({ countsByCca2, selectedCca2, onSelect }: Props
           className="pointer-events-none absolute bg-white border rounded shadow px-2 py-1 text-xs"
           style={{ left: hover.x + 12, top: hover.y + 12 }}
         >
-          <span className="mr-1">{hoverItem.cca2 ? '' : ''}</span>
           <span className="font-medium">{hoverItem.name}</span>
           <span className="text-gray-500 ml-2">
             {hoverItem.count} {hoverItem.count === 1 ? 'book' : 'books'}
@@ -137,24 +151,33 @@ export default function WorldMap({ countsByCca2, selectedCca2, onSelect }: Props
 
 function Legend() {
   return (
-    <div className="flex items-center gap-3 mt-2 text-xs text-gray-600">
-      <span>Books from this country:</span>
-      <span className="flex items-center gap-1">
-        <span className="w-3 h-3 rounded-sm" style={{ background: FILLS[0] }} />
-        0
-      </span>
-      <span className="flex items-center gap-1">
-        <span className="w-3 h-3 rounded-sm" style={{ background: FILLS[1] }} />
-        1
-      </span>
-      <span className="flex items-center gap-1">
-        <span className="w-3 h-3 rounded-sm" style={{ background: FILLS[2] }} />
-        2–4
-      </span>
-      <span className="flex items-center gap-1">
-        <span className="w-3 h-3 rounded-sm" style={{ background: FILLS[3] }} />
-        5+
-      </span>
+    <div className="mt-3 text-xs text-gray-600 space-y-2">
+      <div className="flex flex-wrap gap-3">
+        {CONTINENT_ORDER.map((c) => (
+          <span key={c} className="flex items-center gap-1">
+            <span className="flex rounded-sm overflow-hidden">
+              {[0, 1, 2, 3].map((b) => (
+                <span
+                  key={b}
+                  className="w-2.5 h-3"
+                  style={{ background: CONTINENT_PALETTE[c][b] }}
+                />
+              ))}
+            </span>
+            <span>{CONTINENT_LABEL[c]}</span>
+          </span>
+        ))}
+      </div>
+      <div className="flex items-center gap-3 text-gray-500">
+        <span>Shades mean books from that country:</span>
+        <span>0</span>
+        <span>·</span>
+        <span>1</span>
+        <span>·</span>
+        <span>2–4</span>
+        <span>·</span>
+        <span>5+</span>
+      </div>
     </div>
   );
 }
