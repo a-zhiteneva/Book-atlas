@@ -260,3 +260,54 @@ Acceptance criteria (all must hold on a clean clone with Node 20):
 - [ ] Usable at 375 px and 1280 px widths with no horizontal scroll
 
 Out of scope for this pass, even if tempting: accounts, backend, zoom/pan, dark mode, Goodreads import.
+
+---
+
+## Setup
+
+Prerequisites: Node 20+, npm.
+
+```bash
+npm install
+npm run dev        # http://localhost:5173
+npm run test       # Vitest unit tests
+npm run lint
+npm run build      # type-check + production build in dist/
+npm run seed       # writes book-atlas-seed.json; import via Settings
+```
+
+A clean `npm install && npm run dev` boots the app with an empty library stored in `localStorage` under the key `bookatlas:v1`. To see the app with content, run `npm run seed` and import the generated `book-atlas-seed.json` from Settings → Import → Replace.
+
+## How lookup and country resolution work
+
+The pipeline from "ISBN or title" to a book on the map:
+
+1. **Parse**: `src/lib/isbn.ts` → `parseLookup(input)` returns `isbn | invalid-isbn | query`. ISBN-10 is converted to ISBN-13 with the 978 prefix. `isValidIsbn10/13` run full checksum validation; hyphens, spaces, and lowercase `x` are stripped.
+2. **Open Library**: `src/lib/openLibrary.ts` wraps `/isbn/{isbn}.json`, `/search.json`, `/works/{id}.json`, `/authors/{id}.json`. Every response goes through a single `fetchJson<T>` helper with a 10 s AbortController timeout, typed errors (`NotFoundError`, `NetworkError`, `RateLimitedError`), and a localStorage cache (`src/lib/cache.ts`) with 30-day TTL and a 200-entry cap.
+3. **Hydrate**: `src/lib/lookup.ts` turns an edition or search hit into a `PendingBook`, filling author keys from the work when the edition omits them.
+4. **Resolve the author's country**: `src/lib/wikidata.ts` → `resolveAuthorCountry(seed)`. If OL has `remote_ids.wikidata` it is used directly; otherwise `wbsearchentities` picks the first P31=Q5 candidate whose P106 is a writer-type occupation (Q36180, Q482980, Q6625963, Q49757, Q4853732, Q1930187, Q214917, Q28389, Q11774202, Q333634), else the first human. The entity's P19 → place's P17 (prefer no P582, else latest P582) → P297. If a historical state has no P297, follow P1366 up to three hops. If P19 is missing, fall back to P27 citizenship with the same P297 walk. The P19 place's English label is captured as `birthPlaceLabel` for the "Born in Saint Petersburg → Russia" line.
+5. **Save**: `BooksProvider` dispatches an `add`; `storage.ts` serialises after a 300 ms debounce. The map re-renders because the finished-book counts recompute from the library.
+
+The user can override the auto-resolved country from Add or Book Detail; the override is sticky (`countryOverridden: true`) and Re-resolve preserves it.
+
+## Decisions
+
+Where the spec was silent or where live data contradicted it, these choices were made. Each defaults to the simplest option that satisfies the acceptance criteria.
+
+- **UN denominator is hard-coded.** The spec allows computing from `world-countries` entries with `independent === true` plus VA and PS, falling back to a hard-coded list if the count isn't 195. `world-countries`'s `independent` flag includes Taiwan, Kosovo, Cook Islands, Niue and other non-UN entities, so the automatic count doesn't match. `src/lib/countries.ts` exports `UN_DENOMINATOR` as an explicit 193-member + 2-observer set (195 entries). A UN membership change would need a manual update here.
+- **One hue, four-stop quantile.** Fill stops are hard-coded emerald shades (`#e5e7eb`, `#a7f3d0`, `#34d399`, `#059669`) at 0, 1, 2–4, 5+ matching the spec's buckets.
+- **Status defaults on transitions.** Moving to `reading` fills `dateStarted` with today if empty; moving to `finished` fills `dateFinished` with today if empty. Both remain user-editable afterwards. Flipping away from `finished` keeps the stored `rating` but hides it, as specified.
+- **Autosave cadence.** 300 ms debounced writes to `localStorage` after every reducer action; the first mount of `BooksProvider` skips the save so a fresh load doesn't overwrite nothing with nothing.
+- **Cache eviction.** Oldest-entry-first eviction (by `savedAt`), triggered at both the configured cap (200 entries) and on `QuotaExceeded`. Entries past TTL are evicted on read.
+- **Keyboard shortcut scope.** `/` focuses the nearest search box on Library and Add. It is ignored when an `<input>` or `<textarea>` already has focus so you can type a literal slash in notes without stealing focus.
+- **Seed strategy.** `npm run seed` writes `book-atlas-seed.json` to the project root instead of poking `localStorage` directly (a Node script can't). Import it via Settings → Import → Replace. The seed covers 8 books across 6 countries (RU, US, JP, CO, CZ, NG).
+- **Search response contract.** Open Library's `/search.json` `docs[].author_key[]` are bare IDs (`OL48139A`) whereas `/isbn/.json` and `/works/.json` embed them as paths (`/authors/OL48139A`). Normalised to bare IDs internally; endpoints are rebuilt on fetch.
+- **Live-verification note.** The fixtures under `src/__tests__/fixtures/` were pulled from live Open Library and Wikidata on 2026-10-04 to confirm parser shapes. ISBN `9780143039990` points to the Penguin Classics *War and Peace* in Open Library's current data — not *Lolita*; fixtures are kept as-is since they exercise the parser identically either way.
+
+## Known limitations
+
+- **No live verification of acceptance tests in this session.** The spec's acceptance checklist (ISBN lookup → form, Nabokov → RU end-to-end, map colouring responds to a status change, round-trip export/import, etc.) is only verified at the test and manual-smoke level once you `npm install` and open the app. Live Wikidata was verified during build: Nabokov Q36591 → Saint Petersburg Q656 → Russia Q159 → RU.
+- **Map geometry omits very small countries.** `countries-110m.json` doesn't include Singapore, Malta, Monaco, Vatican, Bahrain, Maldives etc. These still count towards the percentage (when in the UN denominator) and are reachable from the country list under the map, but they don't render on the SVG.
+- **No concurrent-tab reconciliation.** If you open two tabs and edit in both, whichever tab writes last wins. There's no `storage` event listener in v1.
+- **No pre-flight for OL's rate limits.** Open Library returns 429 occasionally under heavy use; `NetworkError`/`RateLimitedError` surface in the Add UI as "Could not reach Open Library" but there is no automatic retry.
+- **Cover 404s render as blank cells**, not a styled placeholder image, because the spec called out "show a placeholder if 404" only in generic terms. The empty frame doubles as the placeholder.
