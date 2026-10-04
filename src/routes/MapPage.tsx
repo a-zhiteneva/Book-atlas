@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import WorldMap from '../components/WorldMap';
 import CountryPanel from '../components/CountryPanel';
 import { useBooks } from '../state/booksContext';
-import { UN_DENOMINATOR, countryFlag, countryName, isDenominatorCountry } from '../lib/countries';
+import { UN_DENOMINATOR, countryName, isDenominatorCountry } from '../lib/countries';
 
 export default function MapPage() {
   const { library } = useBooks();
@@ -81,8 +81,7 @@ export default function MapPage() {
             <div>{finished.length} books finished</div>
             {mostRead && mostRead.cca2s.length === 1 && (
               <div>
-                Most read: {countryFlag(mostRead.cca2s[0])} {countryName(mostRead.cca2s[0])} (
-                {mostRead.count})
+                Most read: {countryName(mostRead.cca2s[0])} ({mostRead.count})
               </div>
             )}
             {mostRead && mostRead.cca2s.length > 1 && (
@@ -90,9 +89,7 @@ export default function MapPage() {
                 <div>Most read ({mostRead.count} each):</div>
                 <ul className="ml-4 mt-0.5">
                   {mostRead.cca2s.map((cca2) => (
-                    <li key={cca2}>
-                      {countryFlag(cca2)} {countryName(cca2)}
-                    </li>
+                    <li key={cca2}>{countryName(cca2)}</li>
                   ))}
                 </ul>
               </div>
@@ -146,7 +143,6 @@ export default function MapPage() {
                     c.cca2 === selected ? 'text-emerald-700 font-medium bg-emerald-50' : '',
                   ].join(' ')}
                 >
-                  <span className="text-lg leading-none">{countryFlag(c.cca2)}</span>
                   <span className="flex-1 text-left">{c.name}</span>
                   <span className="text-xs text-gray-500">{c.count}</span>
                   {!isDenominatorCountry(c.cca2) && (

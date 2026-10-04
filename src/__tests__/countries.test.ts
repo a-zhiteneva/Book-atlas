@@ -5,7 +5,6 @@ import {
   getCountry,
   getCountryByCcn3,
   countryName,
-  countryFlag,
 } from '../lib/countries';
 
 describe('UN_DENOMINATOR', () => {
@@ -50,8 +49,4 @@ describe('getCountry / getCountryByCcn3 / helpers', () => {
     expect(countryName('ZZ')).toBe('ZZ');
   });
 
-  test('countryFlag has a sensible fallback', () => {
-    expect(countryFlag('RU')).not.toBe('🏳️');
-    expect(countryFlag(null)).toBe('🏳️');
-  });
 });

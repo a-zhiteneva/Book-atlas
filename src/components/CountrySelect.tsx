@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { allCountryOptions, countryFlag, countryName } from '../lib/countries';
+import { allCountryOptions, countryName } from '../lib/countries';
 
 interface Props {
   value: string | null;
@@ -51,9 +51,8 @@ export default function CountrySelect({ value, onChange, placeholder, autoFocus 
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center gap-2 border rounded px-3 py-2 text-left bg-white hover:border-gray-400"
+        className="w-full flex items-center border rounded px-3 py-2 text-left bg-white hover:border-gray-400"
       >
-        <span className="text-xl leading-none">{countryFlag(value)}</span>
         <span className={value ? '' : 'text-gray-400'}>
           {value ? countryName(value) : (placeholder ?? 'Pick a country')}
         </span>
@@ -100,12 +99,11 @@ export default function CountrySelect({ value, onChange, placeholder, autoFocus 
                 onMouseEnter={() => setCursor(i)}
                 onClick={() => pick(o.cca2)}
                 className={[
-                  'flex items-center gap-2 px-3 py-1.5 cursor-pointer text-sm',
+                  'px-3 py-1.5 cursor-pointer text-sm',
                   i === cursor ? 'bg-emerald-50' : 'hover:bg-gray-50',
                 ].join(' ')}
               >
-                <span className="text-lg leading-none">{o.flag}</span>
-                <span className="flex-1">{o.name}</span>
+                {o.name}
               </li>
             ))}
           </ul>

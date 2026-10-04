@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useBooks } from '../state/booksContext';
-import { countryFlag, countryName } from '../lib/countries';
+import { countryName } from '../lib/countries';
 import { coverUrl } from '../lib/openLibrary';
 import CountrySelect from '../components/CountrySelect';
 import RatingInput from '../components/RatingInput';
@@ -105,7 +105,6 @@ export default function BookDetail() {
           <span className="text-xs text-gray-500">Country</span>
           {!changingCountry ? (
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xl leading-none">{countryFlag(draft.countryCode)}</span>
               <span>
                 {primary?.birthPlaceLabel ? (
                   <>

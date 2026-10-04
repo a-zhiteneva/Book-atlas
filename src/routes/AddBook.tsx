@@ -13,7 +13,7 @@ import {
 import SearchResults from '../components/SearchResults';
 import CountrySelect from '../components/CountrySelect';
 import RatingInput from '../components/RatingInput';
-import { countryFlag, countryName } from '../lib/countries';
+import { countryName } from '../lib/countries';
 import { coverUrl, NotFoundError } from '../lib/openLibrary';
 import type { Rating, ReadingStatus } from '../state/schema';
 
@@ -282,7 +282,6 @@ function PendingForm({ initial, onCancel, onSave }: FormProps) {
           <span className="text-xs text-gray-500">Country</span>
           {!changing && country ? (
             <div className="flex items-center gap-2">
-              <span className="text-xl leading-none">{countryFlag(country)}</span>
               <span>
                 {primary?.birthPlaceLabel ? (
                   <>

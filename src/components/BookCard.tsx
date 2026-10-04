@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import type { Book, ReadingStatus } from '../state/schema';
-import { countryFlag, countryName } from '../lib/countries';
+import { countryName } from '../lib/countries';
 import { coverUrl } from '../lib/openLibrary';
 import { useBooks } from '../state/booksContext';
 
@@ -37,10 +37,7 @@ export default function BookCard({ book }: Props) {
         <div className="text-sm text-gray-600 line-clamp-1">
           {book.authors[0]?.name ?? 'Unknown author'}
         </div>
-        <div className="text-xs text-gray-500 flex items-center gap-1">
-          <span className="text-base leading-none">{countryFlag(book.countryCode)}</span>
-          <span>{countryName(book.countryCode)}</span>
-        </div>
+        <div className="text-xs text-gray-500">{countryName(book.countryCode)}</div>
         {book.status === 'finished' && book.rating && (
           <div className="text-emerald-600 text-sm">{'★'.repeat(book.rating)}</div>
         )}

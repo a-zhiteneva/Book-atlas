@@ -26,11 +26,6 @@ export function countryName(cca2: string | null | undefined): string {
   return getCountry(cca2)?.name.common ?? cca2;
 }
 
-export function countryFlag(cca2: string | null | undefined): string {
-  if (!cca2) return '🏳️';
-  return getCountry(cca2)?.flag ?? '🏳️';
-}
-
 export const UN_DENOMINATOR: ReadonlySet<string> = new Set([
   'AF', 'AL', 'DZ', 'AD', 'AO', 'AG', 'AR', 'AM', 'AU', 'AT', 'AZ',
   'BS', 'BH', 'BD', 'BB', 'BY', 'BE', 'BZ', 'BJ', 'BT', 'BO', 'BA', 'BW',
@@ -72,11 +67,10 @@ export function isDenominatorCountry(cca2: string | null | undefined): boolean {
 export interface CountrySelectOption {
   cca2: string;
   name: string;
-  flag: string;
 }
 
 export function allCountryOptions(): CountrySelectOption[] {
-  return COUNTRIES.map((c) => ({ cca2: c.cca2, name: c.name.common, flag: c.flag })).sort((a, b) =>
+  return COUNTRIES.map((c) => ({ cca2: c.cca2, name: c.name.common })).sort((a, b) =>
     a.name.localeCompare(b.name),
   );
 }

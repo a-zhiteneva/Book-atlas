@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import type { Book, ReadingStatus } from '../state/schema';
-import { countryFlag, countryName } from '../lib/countries';
+import { countryName } from '../lib/countries';
 import { coverUrl } from '../lib/openLibrary';
 
 interface Props {
@@ -38,7 +38,6 @@ export default function CountryPanel({ cca2, books, onClose }: Props) {
     <aside className="bg-white border rounded p-4">
       <header className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <span className="text-2xl leading-none">{countryFlag(cca2)}</span>
           <h2 className="text-lg font-semibold">{countryName(cca2)}</h2>
           <span className="text-sm text-gray-500">
             {books.length} {books.length === 1 ? 'book' : 'books'}

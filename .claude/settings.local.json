@@ -29,7 +29,11 @@
       "Bash(git commit -m 'feat\\(ui\\): export filtered by status checkboxes *)",
       "Bash(git rm *)",
       "Bash(git commit -m 'chore: ignore TypeScript build artefacts *)",
-      "Bash(git commit -m 'feat\\(ui\\): striped fill for owned/reading-only countries *)"
+      "Bash(git commit -m 'feat\\(ui\\): striped fill for owned/reading-only countries *)",
+      "Bash(git commit -m 'feat\\(ui\\): grey-first map, tie-aware '\\\\''Most read'\\\\'', alphabetical single-column list *)",
+      "Bash(git commit -m 'feat\\(ui\\): continuous saturation on the map, fixed cap at 10 *)",
+      "Bash(git commit -m 'feat\\(ui\\): under-map country list — read-from only, drop /total *)",
+      "Bash(git commit -m 'feat\\(ui\\): drop flags everywhere — just country names *)"
     ]
   }
 }
