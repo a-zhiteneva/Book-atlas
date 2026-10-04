@@ -21,7 +21,8 @@
       "Bash(git commit -m 'feat\\(lib\\): Wikidata author -> country resolution *)",
       "Bash(git commit -m 'feat\\(lib\\): countries wrappers + 195-country UN denominator *)",
       "Bash(npx vitest *)",
-      "Bash(git commit -m 'feat\\(lib\\): continents module + Node-25 localStorage polyfill for tests *)"
+      "Bash(git commit -m 'feat\\(lib\\): continents module + Node-25 localStorage polyfill for tests *)",
+      "Bash(git commit -m 'feat\\(ui\\): map at /, library at /library, add-book button on map home *)"
     ]
   }
 }

@@ -7,9 +7,9 @@ import Settings from './routes/Settings';
 import { BooksProvider } from './state/booksContext';
 
 const navLinks = [
-  { to: '/', label: 'Library', end: true },
+  { to: '/', label: 'Map', end: true },
+  { to: '/library', label: 'Library' },
   { to: '/add', label: 'Add' },
-  { to: '/map', label: 'Map' },
   { to: '/settings', label: 'Settings' },
 ];
 
@@ -67,10 +67,10 @@ export default function App() {
         <TopNav />
         <main className="max-w-6xl mx-auto px-4 md:px-6 py-6">
           <Routes>
-            <Route path="/" element={<Library />} />
+            <Route path="/" element={<MapPage />} />
+            <Route path="/library" element={<Library />} />
             <Route path="/add" element={<AddBook />} />
             <Route path="/book/:id" element={<BookDetail />} />
-            <Route path="/map" element={<MapPage />} />
             <Route path="/settings" element={<Settings />} />
           </Routes>
         </main>

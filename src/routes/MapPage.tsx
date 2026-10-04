@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import WorldMap from '../components/WorldMap';
 import CountryPanel from '../components/CountryPanel';
 import { useBooks } from '../state/booksContext';
@@ -67,18 +67,26 @@ export default function MapPage() {
 
   return (
     <div>
-      <header className="mb-4">
-        <h1 className="text-2xl font-semibold">
-          {denominatorHits} / {total} countries · {pct}%
-        </h1>
-        <div className="text-sm text-gray-600 flex flex-wrap gap-4 mt-1">
-          <span>{finished.length} books finished</span>
-          {mostRead && (
-            <span>
-              Most read: {countryFlag(mostRead[0])} {countryName(mostRead[0])} ({mostRead[1]})
-            </span>
-          )}
+      <header className="mb-4 flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold">
+            {denominatorHits} / {total} countries · {pct}%
+          </h1>
+          <div className="text-sm text-gray-600 flex flex-wrap gap-4 mt-1">
+            <span>{finished.length} books finished</span>
+            {mostRead && (
+              <span>
+                Most read: {countryFlag(mostRead[0])} {countryName(mostRead[0])} ({mostRead[1]})
+              </span>
+            )}
+          </div>
         </div>
+        <Link
+          to="/add"
+          className="self-start md:self-auto px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 text-sm whitespace-nowrap"
+        >
+          + Add a book
+        </Link>
       </header>
 
       <div className="grid lg:grid-cols-[1fr_320px] gap-4">
