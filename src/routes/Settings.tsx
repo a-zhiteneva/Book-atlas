@@ -1,9 +1,16 @@
-import { ChangeEvent, useRef, useState } from 'react';
+import { ChangeEvent, useMemo, useRef, useState } from 'react';
 import pkg from '../../package.json';
 import { useBooks } from '../state/booksContext';
 import { ImportError, parseLibrary } from '../lib/importValidator';
 import { cacheClear, cacheSize } from '../lib/cache';
-import type { Library } from '../state/schema';
+import type { Library, ReadingStatus } from '../state/schema';
+
+const EXPORT_STATUSES: Array<{ status: ReadingStatus; label: string }> = [
+  { status: 'finished', label: 'Finished' },
+  { status: 'reading', label: 'Reading' },
+  { status: 'owned', label: 'Owned' },
+  { status: 'wishlist', label: 'Wishlist' },
+];
 
 export default function Settings() {
   const { library, replaceLibrary, mergeLibrary, clearLibrary } = useBooks();
@@ -12,14 +19,37 @@ export default function Settings() {
   const [importError, setImportError] = useState<string | null>(null);
   const [confirmText, setConfirmText] = useState('');
   const [cacheN, setCacheN] = useState(() => cacheSize());
+  const [exportSelection, setExportSelection] = useState<Record<ReadingStatus, boolean>>({
+    finished: true,
+    reading: true,
+    owned: true,
+    wishlist: true,
+  });
+
+  const selectedStatuses = useMemo(
+    () => EXPORT_STATUSES.filter((s) => exportSelection[s.status]).map((s) => s.status),
+    [exportSelection],
+  );
+
+  const exportCount = useMemo(
+    () => library.books.filter((b) => exportSelection[b.status]).length,
+    [library.books, exportSelection],
+  );
 
   const exportLibrary = () => {
+    if (selectedStatuses.length === 0) return;
     const date = new Date().toISOString().slice(0, 10);
-    const blob = new Blob([JSON.stringify(library, null, 2)], { type: 'application/json' });
+    const payload: Library = {
+      version: library.version,
+      books: library.books.filter((b) => exportSelection[b.status]),
+    };
+    const suffix =
+      selectedStatuses.length === 1 ? `-${selectedStatuses[0]}` : '';
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `book-atlas-${date}.json`;
+    a.download = `book-atlas${suffix}-${date}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -72,15 +102,44 @@ export default function Settings() {
       <section className="space-y-2">
         <h2 className="font-medium">Export</h2>
         <p className="text-sm text-gray-600">
-          Download the whole library ({library.books.length} books) as JSON.
+          Pick which statuses to include. The exported file is a valid Book
+          Atlas library on its own.
         </p>
-        <button
-          type="button"
-          onClick={exportLibrary}
-          className="px-3 py-1.5 bg-emerald-600 text-white rounded text-sm hover:bg-emerald-700"
-        >
-          Export JSON
-        </button>
+        <div className="flex flex-wrap gap-3">
+          {EXPORT_STATUSES.map(({ status, label }) => (
+            <label key={status} className="flex items-center gap-1.5 text-sm">
+              <input
+                type="checkbox"
+                checked={exportSelection[status]}
+                onChange={(e) =>
+                  setExportSelection((prev) => ({ ...prev, [status]: e.target.checked }))
+                }
+              />
+              <span>{label}</span>
+              <span className="text-xs text-gray-400">
+                ({library.books.filter((b) => b.status === status).length})
+              </span>
+            </label>
+          ))}
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={exportLibrary}
+            disabled={selectedStatuses.length === 0}
+            className={[
+              'px-3 py-1.5 rounded text-sm',
+              selectedStatuses.length === 0
+                ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                : 'bg-emerald-600 text-white hover:bg-emerald-700',
+            ].join(' ')}
+          >
+            Export JSON ({exportCount})
+          </button>
+          {selectedStatuses.length === 0 && (
+            <span className="text-xs text-gray-500">Pick at least one status.</span>
+          )}
+        </div>
       </section>
 
       <section className="space-y-2">

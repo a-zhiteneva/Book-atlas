@@ -8,7 +8,7 @@ import {
   useReducer,
   useRef,
 } from 'react';
-import { Author, Book, Library, ReadingStatus, emptyLibrary } from './schema';
+import { Book, Library, ReadingStatus, emptyLibrary } from './schema';
 import { loadLibrary, saveLibrary } from './storage';
 
 type Action =
@@ -133,31 +133,9 @@ export function BooksProvider({ children }: { children: ReactNode }) {
   return <BooksContext.Provider value={value}>{children}</BooksContext.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useBooks(): BooksContextShape {
   const ctx = useContext(BooksContext);
   if (!ctx) throw new Error('useBooks must be used within BooksProvider');
   return ctx;
-}
-
-export function makeBook(seed: {
-  title: string;
-  authors: Author[];
-  status?: ReadingStatus;
-  countryCode?: string | null;
-}): Book {
-  const nowIso = new Date().toISOString();
-  const status: ReadingStatus = seed.status ?? 'finished';
-  return {
-    id: crypto.randomUUID(),
-    title: seed.title,
-    authors: seed.authors,
-    status,
-    notes: '',
-    countryCode: seed.countryCode ?? seed.authors[0]?.birthCountry ?? null,
-    countryOverridden: false,
-    addedAt: nowIso,
-    updatedAt: nowIso,
-    dateFinished: status === 'finished' ? today() : undefined,
-    dateStarted: status === 'reading' ? today() : undefined,
-  };
 }
