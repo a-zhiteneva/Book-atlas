@@ -14,3 +14,6 @@ dist-ssr
 coverage
 .vite
 .superpowers
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts

@@ -26,7 +26,9 @@
       "Bash(git commit -m 'feat\\(ui\\): continent-aware map colors; every country clickable *)",
       "Bash(git commit -m 'feat\\(ui\\): country panel groups by status; map lists all countries, not just finished *)",
       "Bash(npm run *)",
-      "Bash(git commit -m 'feat\\(ui\\): export filtered by status checkboxes *)"
+      "Bash(git commit -m 'feat\\(ui\\): export filtered by status checkboxes *)",
+      "Bash(git rm *)",
+      "Bash(git commit -m 'chore: ignore TypeScript build artefacts *)"
     ]
   }
 }
