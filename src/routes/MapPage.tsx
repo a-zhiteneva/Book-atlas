@@ -24,6 +24,17 @@ export default function MapPage() {
     return m;
   }, [finished]);
 
+  const stripedCca2 = useMemo(() => {
+    const set = new Set<string>();
+    for (const b of library.books) {
+      if (!b.countryCode) continue;
+      if (b.status !== 'owned' && b.status !== 'reading') continue;
+      if ((countsByCca2[b.countryCode] ?? 0) > 0) continue;
+      set.add(b.countryCode);
+    }
+    return set;
+  }, [library.books, countsByCca2]);
+
   const denominatorHits = Object.keys(countsByCca2).filter(isDenominatorCountry).length;
   const total = UN_DENOMINATOR.size;
   const pct = total ? ((denominatorHits / total) * 100).toFixed(1) : '0';
@@ -109,6 +120,7 @@ export default function MapPage() {
         <div>
           <WorldMap
             countsByCca2={countsByCca2}
+            stripedCca2={stripedCca2}
             selectedCca2={selected}
             onSelect={setSelected}
           />

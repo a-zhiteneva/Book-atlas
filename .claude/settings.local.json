@@ -28,7 +28,8 @@
       "Bash(npm run *)",
       "Bash(git commit -m 'feat\\(ui\\): export filtered by status checkboxes *)",
       "Bash(git rm *)",
-      "Bash(git commit -m 'chore: ignore TypeScript build artefacts *)"
+      "Bash(git commit -m 'chore: ignore TypeScript build artefacts *)",
+      "Bash(git commit -m 'feat\\(ui\\): striped fill for owned/reading-only countries *)"
     ]
   }
 }
