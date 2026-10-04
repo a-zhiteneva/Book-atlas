@@ -36,15 +36,21 @@ describe('continentFor', () => {
     expect(continentFor('LB')).toBe('middle-east');
   });
 
-  test('Iran and Afghanistan land in Asia (world-countries puts them in Southern Asia)', () => {
-    expect(continentFor('IR')).toBe('asia');
-    expect(continentFor('AF')).toBe('asia');
+  test('Middle East overrides: IR, AF (Southern Asia in M.49) and EG + Maghreb (Africa in M.49)', () => {
+    expect(continentFor('IR')).toBe('middle-east');
+    expect(continentFor('AF')).toBe('middle-east');
+    expect(continentFor('EG')).toBe('middle-east');
+    expect(continentFor('LY')).toBe('middle-east');
+    expect(continentFor('TN')).toBe('middle-east');
+    expect(continentFor('DZ')).toBe('middle-east');
+    expect(continentFor('MA')).toBe('middle-east');
   });
 
-  test('Africa: EG, NG, ZA (Egypt stays Africa per world-countries)', () => {
-    expect(continentFor('EG')).toBe('africa');
+  test('Africa: NG, ZA, KE, GH (Sub-Saharan countries stay Africa)', () => {
     expect(continentFor('NG')).toBe('africa');
     expect(continentFor('ZA')).toBe('africa');
+    expect(continentFor('KE')).toBe('africa');
+    expect(continentFor('GH')).toBe('africa');
   });
 
   test('Asia (non-Western): CN, JP, IN, TH', () => {

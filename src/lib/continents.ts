@@ -34,9 +34,26 @@ interface RegionCountry {
   subregion?: string;
 }
 
+// Overrides vs. the raw world-countries region/subregion. These pull
+// countries into Middle East that UN M.49 classifies elsewhere:
+//   - IR, AF: subregion 'Southern Asia' in M.49 but culturally Middle East
+//   - EG, LY, TN, DZ, MA: region 'Africa' / subregion 'Northern Africa'
+//     but commonly treated as Middle East
+const OVERRIDES: Record<string, Continent> = {
+  IR: 'middle-east',
+  AF: 'middle-east',
+  EG: 'middle-east',
+  LY: 'middle-east',
+  TN: 'middle-east',
+  DZ: 'middle-east',
+  MA: 'middle-east',
+};
+
 export function continentFor(cca2: string | null | undefined): Continent | null {
   if (!cca2) return null;
-  const c = getCountry(cca2) as unknown as RegionCountry | undefined;
+  const upper = cca2.toUpperCase();
+  if (OVERRIDES[upper]) return OVERRIDES[upper];
+  const c = getCountry(upper) as unknown as RegionCountry | undefined;
   if (!c) return null;
   const region = c.region;
   const subregion = c.subregion;
