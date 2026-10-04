@@ -11,7 +11,14 @@
       "Bash(curl -sS -L -o src/__tests__/fixtures/ol-work-OL267171W.json \"https://openlibrary.org/works/OL267171W.json\")",
       "Bash(curl -sS -L -o src/__tests__/fixtures/ol-author-OL26783A.json \"https://openlibrary.org/authors/OL26783A.json\")",
       "Bash(node *)",
-      "Bash(git commit -m 'feat\\(lib\\): Open Library wrappers + 30-day cache *)"
+      "Bash(git commit -m 'feat\\(lib\\): Open Library wrappers + 30-day cache *)",
+      "Bash(curl -sS -L -o src/__tests__/fixtures/ol-author-OL48139A.json \"https://openlibrary.org/authors/OL48139A.json\")",
+      "Bash(curl -sS -L -o src/__tests__/fixtures/wd-Q7781.json \"https://www.wikidata.org/wiki/Special:EntityData/Q7781.json\")",
+      "Bash(curl -sS -L -o src/__tests__/fixtures/wd-Q36591.json \"https://www.wikidata.org/wiki/Special:EntityData/Q36591.json\")",
+      "Bash(curl -sS -L -o src/__tests__/fixtures/wd-Q656.json \"https://www.wikidata.org/wiki/Special:EntityData/Q656.json\")",
+      "Bash(curl -sS -L -o src/__tests__/fixtures/wd-Q159.json \"https://www.wikidata.org/wiki/Special:EntityData/Q159.json\")",
+      "Bash(curl -sS -L -o src/__tests__/fixtures/wd-search-nabokov.json \"https://www.wikidata.org/w/api.php?action=wbsearchentities&search=Vladimir+Nabokov&language=en&type=item&limit=5&format=json&origin=*\")",
+      "Bash(git commit -m 'feat\\(lib\\): Wikidata author -> country resolution *)"
     ]
   }
 }
