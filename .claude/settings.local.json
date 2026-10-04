@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(git add *)",
-      "Bash(git commit -m 'chore: scaffold Vite + React + TS + Tailwind + router shell *)"
+      "Bash(git commit -m 'chore: scaffold Vite + React + TS + Tailwind + router shell *)",
+      "Bash(git commit -m 'feat\\(state\\): schema, storage with migrate, BooksProvider *)"
     ]
   }
 }
