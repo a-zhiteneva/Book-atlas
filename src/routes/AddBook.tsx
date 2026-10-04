@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useBooks } from '../state/booksContext';
 import { parseLookup } from '../lib/isbn';
 import type { SearchHit } from '../lib/openLibrary';
@@ -42,6 +42,7 @@ export default function AddBook() {
   const [stage, setStage] = useState<Stage>({ kind: 'input' });
   const [raw, setRaw] = useState('');
   const [notice, setNotice] = useState<string | null>(null);
+  const [duplicateId, setDuplicateId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -69,9 +70,8 @@ export default function AddBook() {
     try {
       const pending = await pendingFromIsbn(isbn);
       const dup = findDuplicate(pending);
-      if (dup) {
-        setNotice(`Already in library.`);
-      }
+      setDuplicateId(dup?.id ?? null);
+      if (dup) setNotice('Already in library.');
       setStage({ kind: 'form', pending });
     } catch (e) {
       if (e instanceof NotFoundError) {
@@ -88,6 +88,7 @@ export default function AddBook() {
     try {
       const pending = await pendingFromSearchHit(hit);
       const dup = findDuplicate(pending);
+      setDuplicateId(dup?.id ?? null);
       if (dup) setNotice('Already in library.');
       setStage({ kind: 'form', pending });
     } catch {
@@ -130,8 +131,13 @@ export default function AddBook() {
       <h1 className="text-2xl font-semibold mb-4">Add a book</h1>
 
       {notice && (
-        <div className="mb-3 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded px-3 py-2">
-          {notice}
+        <div className="mb-3 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded px-3 py-2 flex items-center gap-2">
+          <span>{notice}</span>
+          {duplicateId && (
+            <Link to={`/book/${duplicateId}`} className="underline">
+              Open existing
+            </Link>
+          )}
         </div>
       )}
 

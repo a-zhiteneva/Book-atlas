@@ -2,7 +2,9 @@ import { useMemo, useState } from 'react';
 import { geoEqualEarth, geoPath } from 'd3-geo';
 import { feature } from 'topojson-client';
 import type { Feature, FeatureCollection, Geometry } from 'geojson';
-import topology from 'world-atlas/countries-110m.json';
+// world-atlas ships raw TopoJSON without TypeScript types; the shape is
+// {objects: {countries: GeometryCollection}, ...}.
+import rawTopology from 'world-atlas/countries-110m.json';
 import { getCountryByCcn3 } from '../lib/countries';
 
 interface Props {
@@ -32,7 +34,8 @@ export default function WorldMap({ countsByCca2, selectedCca2, onSelect }: Props
   const [hover, setHover] = useState<{ cca2: string; x: number; y: number } | null>(null);
 
   const { features, pathFn } = useMemo(() => {
-    const topo = topology as unknown as Parameters<typeof feature>[0];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const topo = rawTopology as any;
     const collection = feature(topo, topo.objects.countries) as unknown as FeatureCollection<
       Geometry,
       CountryFeatureProps
