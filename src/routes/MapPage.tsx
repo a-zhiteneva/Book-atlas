@@ -35,8 +35,17 @@ export default function MapPage() {
 
   const booksForSelected = useMemo(() => {
     if (!selected) return [];
-    return finished.filter((b) => b.countryCode === selected);
-  }, [finished, selected]);
+    return library.books.filter((b) => b.countryCode === selected);
+  }, [library.books, selected]);
+
+  const totalsByCca2 = useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const b of library.books) {
+      if (!b.countryCode) continue;
+      m[b.countryCode] = (m[b.countryCode] ?? 0) + 1;
+    }
+    return m;
+  }, [library]);
 
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
@@ -57,13 +66,20 @@ export default function MapPage() {
     setParams(next);
   };
 
-  const sortedCountries = useMemo(
-    () =>
-      Object.entries(countsByCca2)
-        .map(([cca2, count]) => ({ cca2, count, name: countryName(cca2) }))
-        .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name)),
-    [countsByCca2],
-  );
+  const sortedCountries = useMemo(() => {
+    const codes = new Set<string>([
+      ...Object.keys(countsByCca2),
+      ...Object.keys(totalsByCca2),
+    ]);
+    return Array.from(codes)
+      .map((cca2) => ({
+        cca2,
+        count: countsByCca2[cca2] ?? 0,
+        total: totalsByCca2[cca2] ?? 0,
+        name: countryName(cca2),
+      }))
+      .sort((a, b) => b.count - a.count || b.total - a.total || a.name.localeCompare(b.name));
+  }, [countsByCca2, totalsByCca2]);
 
   return (
     <div>
@@ -110,11 +126,11 @@ export default function MapPage() {
 
       <section className="mt-8">
         <h2 className="text-sm font-semibold text-gray-700 mb-2">
-          Countries with finished books ({sortedCountries.length})
+          Countries in your library ({sortedCountries.length})
         </h2>
         {sortedCountries.length === 0 ? (
           <div className="text-sm text-gray-500">
-            Mark a book as Finished to see it on the map.
+            Add a book to see its country here.
           </div>
         ) : (
           <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-1 text-sm">
@@ -130,7 +146,12 @@ export default function MapPage() {
                 >
                   <span className="text-lg leading-none">{countryFlag(c.cca2)}</span>
                   <span className="flex-1 text-left">{c.name}</span>
-                  <span className="text-xs text-gray-500">{c.count}</span>
+                  <span className="text-xs text-gray-500">
+                    {c.count}
+                    {c.total > c.count && (
+                      <span className="text-gray-400"> / {c.total}</span>
+                    )}
+                  </span>
                   {!isDenominatorCountry(c.cca2) && (
                     <span className="text-[10px] text-gray-400">(not counted)</span>
                   )}

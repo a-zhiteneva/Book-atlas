@@ -23,7 +23,8 @@
       "Bash(npx vitest *)",
       "Bash(git commit -m 'feat\\(lib\\): continents module + Node-25 localStorage polyfill for tests *)",
       "Bash(git commit -m 'feat\\(ui\\): map at /, library at /library, add-book button on map home *)",
-      "Bash(git commit -m 'feat\\(ui\\): continent-aware map colors; every country clickable *)"
+      "Bash(git commit -m 'feat\\(ui\\): continent-aware map colors; every country clickable *)",
+      "Bash(git commit -m 'feat\\(ui\\): country panel groups by status; map lists all countries, not just finished *)"
     ]
   }
 }
