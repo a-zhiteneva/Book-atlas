@@ -44,15 +44,6 @@ export default function MapPage() {
     return library.books.filter((b) => b.countryCode === selected);
   }, [library.books, selected]);
 
-  const totalsByCca2 = useMemo(() => {
-    const m: Record<string, number> = {};
-    for (const b of library.books) {
-      if (!b.countryCode) continue;
-      m[b.countryCode] = (m[b.countryCode] ?? 0) + 1;
-    }
-    return m;
-  }, [library]);
-
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && selected) {
@@ -73,19 +64,11 @@ export default function MapPage() {
   };
 
   const sortedCountries = useMemo(() => {
-    const codes = new Set<string>([
-      ...Object.keys(countsByCca2),
-      ...Object.keys(totalsByCca2),
-    ]);
-    return Array.from(codes)
-      .map((cca2) => ({
-        cca2,
-        count: countsByCca2[cca2] ?? 0,
-        total: totalsByCca2[cca2] ?? 0,
-        name: countryName(cca2),
-      }))
+    return Object.entries(countsByCca2)
+      .filter(([, count]) => count > 0)
+      .map(([cca2, count]) => ({ cca2, count, name: countryName(cca2) }))
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [countsByCca2, totalsByCca2]);
+  }, [countsByCca2]);
 
   return (
     <div>
@@ -145,11 +128,11 @@ export default function MapPage() {
 
       <section className="mt-8">
         <h2 className="text-sm font-semibold text-gray-700 mb-2">
-          Countries in your library ({sortedCountries.length})
+          Countries you've read from ({sortedCountries.length})
         </h2>
         {sortedCountries.length === 0 ? (
           <div className="text-sm text-gray-500">
-            Add a book to see its country here.
+            Mark a book as Finished to see its country here.
           </div>
         ) : (
           <ul className="text-sm divide-y border rounded bg-white">
@@ -165,12 +148,7 @@ export default function MapPage() {
                 >
                   <span className="text-lg leading-none">{countryFlag(c.cca2)}</span>
                   <span className="flex-1 text-left">{c.name}</span>
-                  <span className="text-xs text-gray-500">
-                    {c.count}
-                    {c.total > c.count && (
-                      <span className="text-gray-400"> / {c.total}</span>
-                    )}
-                  </span>
+                  <span className="text-xs text-gray-500">{c.count}</span>
                   {!isDenominatorCountry(c.cca2) && (
                     <span className="text-[10px] text-gray-400">(not counted)</span>
                   )}
